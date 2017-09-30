@@ -17,8 +17,8 @@ architecture arch_sm of serial_memory is
 	 spi_ss, spi_mosi, spi_sck : in std_logic; spi_miso : out std_logic;
 	 spi_channel : out std_logic_vector(3 downto 0);
 	 tx : out std_logic; rx : in std_logic;
-	 channel : in std_logic_vector(3 downto 0); -- new_sample : out std_logic;
-	 -- sample : out std_logic_vector (9 downto 0); sample_channel : out std_logic_vector (3 downto 0);
+	 channel : in std_logic_vector(3 downto 0); new_sample : out std_logic;
+	 sample : out std_logic_vector (9 downto 0); sample_channel : out std_logic_vector (3 downto 0);
 	 tx_data : in std_logic_vector(7 downto 0); new_tx_data, tx_block : in std_logic; tx_busy : out std_logic;
 	 rx_data : out std_logic_vector(7 downto 0); new_rx_data : out std_logic);
   end component;
@@ -139,8 +139,12 @@ begin
     new_tx_data_q <= new_tx_data_d;
   end process;
 
-  avr_interface0: avr_interface port map(clk, rst, cclk, spi_ss, spi_mosi, spi_sck, spi_miso, spi_channel,
-					 avr_rx, avr_tx, "1111", tx_data, new_tx_data_q,
-					 avr_rx_busy, tx_busy, rx_data, new_rx_data);
+  avr_interface0: avr_interface port map(clk => clk, rst => rst, cclk => cclk,
+					 spi_ss => spi_ss, spi_mosi => spi_mosi, spi_sck => spi_sck,
+					 spi_miso => spi_miso, spi_channel => spi_channel, sample => open,
+					 sample_channel => open, new_sample => open, channel => "1111",
+					 rx => avr_tx, tx => avr_rx,
+					 tx_data => tx_data, new_tx_data => new_tx_data_q, tx_block => avr_rx_busy,
+					 tx_busy => tx_busy, rx_data => rx_data, new_rx_data => new_rx_data);
   single_port_ram0 : single_port_ram port map(write_rx_data_q, ram_idx, ram_write, tx_data);
 end architecture arch_sm;

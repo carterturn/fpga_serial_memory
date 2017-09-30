@@ -21,18 +21,19 @@ begin
   begin
     ss_d <= ss;
     mosi_d <= mosi;
+    miso_d <= miso_q;
     sck_d <= sck;
     sck_old_d <= sck_q;
+    data_d <= data_q;
+    done_d <= '0';
+    bit_ct_d <= bit_ct_q;
+    dout_d <= dout_q;
 
     if ss_q = '1' then
       bit_ct_d <= "000";
       data_d <= din;
       miso_d <= data_q(7);
-      done_d <= '0';
-      dout_d <= dout_q;
     else
-      bit_ct_d <= bit_ct_q;
-      miso_d <= miso_q;
       if not (sck_old_q = '1') and sck_q = '1' then
 	data_d <= data_q(6 downto 0) & mosi_q;
 	bit_ct_d <= std_logic_vector(unsigned(bit_ct_q) + 1);
@@ -43,13 +44,6 @@ begin
 	end if;
       elsif sck_old_q = '1' and not (sck_q = '1') then
 	miso_d <= data_q(7);
-	data_d <= data_q;
-	done_d <= '0';
-	dout_d <= dout_q;
-      else
-	data_d <= data_q;
-	done_d <= '0';
-	dout_d <= dout_q;
       end if;
     end if;
   end process;
