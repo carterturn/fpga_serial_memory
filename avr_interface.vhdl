@@ -37,28 +37,19 @@ architecture avr_interface_basic of avr_interface is
   signal sample_d, sample_q : std_logic_vector(9 downto 0);
   signal sample_channel_d, sample_channel_q : std_logic_vector(3 downto 0);
 begin
-  process (ready, new_sample_q, sample_q, sample_channel_q, byte_ct_q, spi_ss, spi_done, spi_dout) is
-  begin
-    n_rdy <= not ready;
-    
-    new_sample <= new_sample_q;
-    sample <= sample_q;
-    sample_channel <= sample_channel_q;
 
-    if ready = '1' then
-      spi_channel <= channel;
-      tx <= tx_m;
-    else
-      spi_channel <= "ZZZZ";
-      tx <= 'Z';
-    end if;
-    
-    if (ready = '1') and not (spi_ss = '1') then
-      spi_miso <= spi_miso_m;
-    else
-      spi_miso <= 'Z';
-    end if;
-    
+  n_rdy <= not ready;
+
+  new_sample <= new_sample_q;
+  sample <= sample_q;
+  sample_channel <= sample_channel_q;
+  
+  spi_channel <= channel when(ready = '1') else "ZZZZ";
+  tx <= tx_m when(ready = '1') else 'Z';
+  spi_miso <= spi_miso_m when((ready = '1') and not (spi_ss = '1')) else 'Z';
+  
+  process (sample_q, sample_channel_q, byte_ct_q, spi_ss, spi_done, spi_dout) is
+  begin
     byte_ct_d <= byte_ct_q;
     sample_d <= sample_q;
     new_sample_d <= '0';

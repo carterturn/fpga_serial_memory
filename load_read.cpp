@@ -70,11 +70,11 @@ int main(int argc, char* argv[]){
 	}
 
 	for(int i = 0; i < 256; i++){
-		usleep(10000);
+		usleep(1000);
 		write_char(serial_fd, (char) i);
-		usleep(10000);
+		usleep(1000);
 		write_char(serial_fd, 13);
-		usleep(10000);
+		usleep(1000);
 		write_char(serial_fd, (char) i);
 	}
 
@@ -82,13 +82,13 @@ int main(int argc, char* argv[]){
 		for(int i = 0; i < 32; i++){
 			for(int j = i*8; j < i*8+8; j++){
 				write_char(serial_fd, (char) j);
-				usleep(10000);
+				usleep(1000);
 				write_char(serial_fd, 8);
-				usleep(10000);
+				usleep(1000);
 				char c;
 				read_char(serial_fd, &c);
 				cout << j << ":" << (int) (unsigned char) c << "\t";
-				usleep(10000);
+				usleep(1000);
 			}
 			cout << "\n";
 		}
@@ -96,3 +96,4 @@ int main(int argc, char* argv[]){
 
 	return 0;
 }
+
