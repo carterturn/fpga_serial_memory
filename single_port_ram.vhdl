@@ -18,7 +18,7 @@ architecture arch_dist_ram of single_port_ram is
 begin
   address_int <= to_integer(unsigned(address));
   
-  process (we, address_int) is
+  process (we, address_int, ram) is
   begin
     if rising_edge(we) then
       ram(address_int) <= data_in;

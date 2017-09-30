@@ -24,7 +24,7 @@ begin
   tx <= tx_q;
   busy <= busy_q;
 
-  process (tx_block, ctr_q, bit_ctr_q, data_q, state_q, busy_q, tx_block_q, data) is
+  process (tx_block, ctr_q, bit_ctr_q, data_q, state_q, busy_q, tx_block_q, data, new_data) is
   begin
     tx_block_d <= tx_block;
     ctr_d <= ctr_q;
