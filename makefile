@@ -149,7 +149,7 @@ sim:
 	echo "export PLATFORM=$(XILINX_PLATFORM)" >> run_sim.sh
 	echo "export PATH=$PATH:$(XILINX_BIN)" >> run_sim.sh
 	echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(XILINX)/lib/$(XILINX_PLATFORM)" >> run_sim.sh
-	echo "./$(MAIN_FILE).sim -gui" >> run_sim.sh
+	echo "./$(MAIN_FILE).sim -gui -view Default.wcfg" >> run_sim.sh
 	chmod +x run_sim.sh
 .PHONY: sim_clean
 sim_clean:
