@@ -26,14 +26,19 @@ architecture arch_sm of serial_memory is
     port(we : in std_logic; address : in std_logic_vector(7 downto 0);
 	 data_in : in std_logic_vector(7 downto 0); data_out : out std_logic_vector(7 downto 0));
   end component;
+  component pulse
+    port(clk, trigger : in std_logic; output : out std_logic);
+  end component;
+  
   signal rst : std_logic;
   signal rx_data, tx_data : std_logic_vector(7 downto 0);
-  signal tx_busy, new_rx_data, new_tx_data_d, new_tx_data_q : std_logic;
+  signal tx_busy, new_rx_data, new_tx_data : std_logic;
 
   signal ram_idx : std_logic_vector(7 downto 0);
   signal ram_write : std_logic_vector(7 downto 0);
-  signal key_enter, key_backspace, write_rx_data_d, write_rx_data_q: std_logic;
-  signal address_loaded, write_next_byte, write_this_byte, read_this_byte : boolean;
+  signal key_enter, key_backspace, write_to_ram: std_logic;
+  signal address_loaded, write_next_byte, write_this_byte, read_this_byte : std_logic;
+  signal new_tx_done, write_rx_done : std_logic;
 begin
   rst <= not rst_n;
   
@@ -70,73 +75,30 @@ begin
   led(6) <= key_backspace;
   led(7) <= key_enter;
 
-  process (new_tx_data_q, address_loaded, read_this_byte) is
-    variable done : boolean := false;
-  begin
-    new_tx_data_d <= '0';
-    
-    if new_tx_data_q = '1' then
-      done := true;
-    end if;
-    
-    if read_this_byte and not done then
-      new_tx_data_d <= '1';
-    end if;
-    
-    if address_loaded then
-      done := false;
-    end if;
-  end process;
-
-  process (write_rx_data_q, address_loaded, write_this_byte) is
-    variable done : boolean := false;
-  begin
-    write_rx_data_d <= '0';
-
-    if write_rx_data_q = '1' then
-      done := true;
-    end if;
-    
-    if write_this_byte and not done then
-      write_rx_data_d <= '1';
-    end if;
-    
-    if address_loaded then
-      done := false;
-    end if;
-  end process;
-
   process (new_rx_data) is
   begin    
     if falling_edge(new_rx_data) then
-      if not address_loaded then
+      if address_loaded = '0' then
 	ram_idx <= rx_data;
-	read_this_byte <= false;
-	write_this_byte <= false;
-	address_loaded <= true;
+	read_this_byte <= '0';
+	write_this_byte <= '0';
+	address_loaded <= '1';
       else
-	if not write_next_byte then
+	if write_next_byte = '0' then
 	  if key_enter = '1' then
-	    write_next_byte <= true;
+	    write_next_byte <= '1';
 	  elsif key_backspace = '1' then
-	    read_this_byte <= true;
-	    address_loaded <= false;
+	    read_this_byte <= '1';
+	    address_loaded <= '0';
 	  end if;
 	else
-	  write_next_byte <= false;
+	  write_next_byte <= '0';
 	  ram_write <= rx_data;
-	  address_loaded <= false;
-	  write_this_byte <= true;
+	  address_loaded <= '0';
+	  write_this_byte <= '1';
 	end if;
       end if;
     end if;
-  end process;
-
-  process is
-  begin
-    wait until clk = '1';
-    write_rx_data_q <= write_rx_data_d;
-    new_tx_data_q <= new_tx_data_d;
   end process;
 
   avr_interface0: avr_interface port map(clk => clk, rst => rst, cclk => cclk,
@@ -144,7 +106,9 @@ begin
 					 spi_miso => spi_miso, spi_channel => spi_channel, sample => open,
 					 sample_channel => open, new_sample => open, channel => "1111",
 					 rx => avr_tx, tx => avr_rx,
-					 tx_data => tx_data, new_tx_data => new_tx_data_q, tx_block => avr_rx_busy,
+					 tx_data => tx_data, new_tx_data => new_tx_data, tx_block => avr_rx_busy,
 					 tx_busy => tx_busy, rx_data => rx_data, new_rx_data => new_rx_data);
-  single_port_ram0 : single_port_ram port map(write_rx_data_q, ram_idx, ram_write, tx_data);
+  single_port_ram0 : single_port_ram port map(write_to_ram, ram_idx, ram_write, tx_data);
+  ram_write_pulse : pulse port map(clk, write_this_byte, write_to_ram);
+  new_tx_pulse : pulse port map(clk, read_this_byte, new_tx_data);
 end architecture arch_sm;
