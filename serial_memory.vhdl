@@ -37,7 +37,12 @@ architecture arch_sm of serial_memory is
   signal ram_idx : std_logic_vector(7 downto 0);
   signal ram_write : std_logic_vector(7 downto 0);
   signal key_enter, key_backspace, write_to_ram: std_logic;
-  signal address_loaded, write_next_byte, write_this_byte, read_this_byte : std_logic;
+
+  constant IDLE : std_logic_vector := "00";
+  constant ADDRESS_LOADED : std_logic_vector := "01";
+  constant WRITE_NEXT_BYTE : std_logic_vector := "10";
+  signal state : std_logic_vector(1 downto 0) := IDLE;
+  signal write_this_byte, read_this_byte : std_logic;
   signal new_tx_done, write_rx_done : std_logic;
 begin
   rst <= not rst_n;
@@ -78,26 +83,26 @@ begin
   process (new_rx_data) is
   begin    
     if falling_edge(new_rx_data) then
-      if address_loaded = '0' then
-	ram_idx <= rx_data;
-	read_this_byte <= '0';
-	write_this_byte <= '0';
-	address_loaded <= '1';
-      else
-	if write_next_byte = '0' then
+      case state is
+	when IDLE =>
+	  ram_idx <= rx_data;
+	  read_this_byte <= '0';
+	  write_this_byte <= '0';
+	  state <= ADDRESS_LOADED;
+	when ADDRESS_LOADED =>
 	  if key_enter = '1' then
-	    write_next_byte <= '1';
+	    state <= WRITE_NEXT_BYTE;
 	  elsif key_backspace = '1' then
 	    read_this_byte <= '1';
-	    address_loaded <= '0';
+	    state <= IDLE;
 	  end if;
-	else
-	  write_next_byte <= '0';
+	when WRITE_NEXT_BYTE =>
 	  ram_write <= rx_data;
-	  address_loaded <= '0';
 	  write_this_byte <= '1';
-	end if;
-      end if;
+	  state <= IDLE;
+	when others =>
+	  state <= IDLE;
+      end case;
     end if;
   end process;
 
