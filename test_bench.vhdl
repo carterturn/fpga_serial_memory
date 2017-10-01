@@ -19,7 +19,7 @@ architecture main_test of test_bench is
 
   signal clk, cclk, rst_n : std_logic := '0';
   signal usb_tx : std_logic := '1';
-  signal data : std_logic_vector(191 downto 0) :=
+  signal data : std_logic_vector(319 downto 0) :=
     "00001000" & "00000000" &
     "00001000" & "00000001" &
     "00001000" & "00000010" &
@@ -61,7 +61,7 @@ begin
     for I in 0 to 7 loop
       wait for 2us;
       usb_tx <= data(0);
-      data <= '0' & data(191 downto 1);
+      data <= '0' & data(319 downto 1);
     end loop;
     
     -- End transmission
