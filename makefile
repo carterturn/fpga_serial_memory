@@ -11,7 +11,7 @@ ISE=$(XILINX_BIN)/ise
 SIM=$(XILINX_BIN)/fuse
 
 MAIN_FILE=serial_memory
-FILES=$(MAIN_FILE).vhdl avr_interface.vhdl cclk_detector.vhdl spi_slave.vhdl serial_rx.vhdl serial_tx.vhdl single_port_ram.vhdl pulse.vhdl
+FILES=$(MAIN_FILE).vhdl avr_interface.vhdl cclk_detector.vhdl spi_slave.vhdl serial_rx.vhdl serial_tx.vhdl single_port_ram.vhdl pulse.vhdl serial_router.vhdl
 FILE_TYPE=vhdl
 TEST_BENCH=test_bench
 
